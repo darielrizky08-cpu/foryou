@@ -1,137 +1,209 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For You 🤍</title>
+<title>Still With You 🤍</title>
 
 <style>
 body{
   margin:0;
-  font-family:system-ui;
-  background:#000;
+  font-family:sans-serif;
+  background:radial-gradient(circle at 50% 20%, #ffd6e8, #e89bb8 60%, #8c4f74);
+  color:white;
+  text-align:center;
   overflow:hidden;
 }
 
-.app{
-  position:relative;
-  width:100vw;
+/* Opening & Ending */
+#opening, #ending{
   height:100vh;
-}
-
-.bg{
-  position:absolute;
-  inset:0;
-  background: radial-gradient(circle at 50% 20%, #ffe6f0, #e6a9c8 60%, #b983a6);
-  animation: glow 6s ease-in-out infinite alternate;
-}
-
-@keyframes glow{
-  from{filter:brightness(1)}
-  to{filter:brightness(1.15)}
-}
-
-.layer{
-  position:absolute;
-  inset:0;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  text-align:center;
-  color:white;
+}
+
+/* Main Slide */
+#main{
+  display:none;
   padding:20px;
 }
 
-.circle{
-  width:min(75vw,320px);
-  height:min(75vw,320px);
-  border-radius:50%;
-  overflow:hidden;
-  border:5px solid rgba(255,255,255,.8);
-  box-shadow:0 0 40px rgba(255,150,200,.7);
-  margin-bottom:20px;
-}
-
-.circle img{
-  width:100%;
-  height:100%;
+img{
+  width:260px;
+  height:260px;
   object-fit:cover;
-  transition:opacity 1s ease;
+  border-radius:50%;
+  margin-top:40px;
+  opacity:0;
+  transition:opacity 1.5s ease, transform 16s ease;
+  box-shadow:0 0 40px rgba(255,255,255,0.5);
 }
 
-.panel{
-  background:rgba(0,0,0,.5);
-  padding:15px;
-  border-radius:15px;
-  max-width:90%;
+#text{
+  max-width:500px;
+  margin:auto;
+  line-height:1.8;
+  margin-top:25px;
+  white-space:pre-line;
+  background:rgba(0,0,0,0.4);
+  padding:20px;
+  border-radius:20px;
+  backdrop-filter:blur(6px);
 }
 
 button{
-  padding:10px 20px;
+  padding:12px 28px;
   border:none;
-  border-radius:20px;
-  background:white;
+  border-radius:25px;
+  margin-top:20px;
   font-weight:bold;
+  cursor:pointer;
+}
+
+#ending{
+  display:none;
+  background:black;
+  transition:opacity 3s ease;
 }
 </style>
 </head>
 
 <body>
-<div class="app">
 
-<div class="bg"></div>
-
-<div class="layer" id="opening">
-  <h2>From me → For you 🤍</h2>
-  <button onclick="start()">Tap to Start</button>
+<div id="opening">
+  <h2>Before you press start… 🤍</h2>
+  <button onclick="startShow()">Ready?</button>
 </div>
 
-<div class="layer" id="main" style="display:none;">
-  <div class="circle">
-    <img id="photo" src="foto1.jpg">
-  </div>
-  <div class="panel" id="text"></div>
+<div id="main">
+  <img id="photo">
+  <div id="text"></div>
+</div>
+
+<div id="ending">
+  <h1 style="opacity:0;" id="finalLine">
+    Still with you.<br>Always.
+  </h1>
+  <button onclick="secret()" id="secretBtn" style="display:none;">
+    One more thing…
+  </button>
 </div>
 
 <audio id="music" src="lagu.mp3"></audio>
-
-</div>
 
 <script>
 const photos=["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg","foto5.jpg"];
 
 const texts=[
-"first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.",
-"hari ini bukan sekedar hari kasih sayang, tapi hari aku bersyukur karena ketemu kamu.",
-"aku ngerayain kesabaran kamu, cara kamu stay even when things aren't easy.",
-"being with you taught me that love doesn't have to be loud.",
-"so today, i celebrate you. still with you, always 🤍"
+`first,
+terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
+lewat hal-hal kecil yang bahkan aku sendiri nggak sadar,
+ternyata selalu ada kamu di dalamnya.`,
+
+`mungkin kelihatan nggak bermakna ya?
+tapi serius…
+hari ini bukan sekadar hari kasih sayang.
+ini hari yang aku tunggu-tunggu
+karena semesta pernah baik banget ngenalin aku ke kamu.`,
+
+`aku ngerayain kesabaran kamu.
+cara kamu stay even when things aren't easy.
+cara kamu hadir tanpa banyak janji,
+tapi selalu nyata.`,
+
+`being with you taught me
+that love doesn't have to be loud.
+sometimes it's quiet.
+warm.
+and steady.
+like you holding my hand without saying anything,
+but somehow everything feels okay.`,
+
+`so today, i celebrate you.
+i celebrate us.
+not just on valentine,
+but on every ordinary day that turns special
+just because you're there.
+
+thank you for choosing me.
+for staying.
+for loving me in ways
+i never knew i needed this much.`
 ];
 
 let index=0;
 let interval;
 
-function start(){
+function startShow(){
   document.getElementById("opening").style.display="none";
-  document.getElementById("main").style.display="flex";
-
-  const music=document.getElementById("music");
-  music.play().catch(()=>{});
-
+  document.getElementById("main").style.display="block";
+  fadeInMusic();
   showSlide();
-  interval=setInterval(showSlide,6000);
+  interval=setInterval(showSlide,16500); // ±83 detik total
 }
 
 function showSlide(){
   if(index>=photos.length){
     clearInterval(interval);
+    fadeOutMusic();
+    document.getElementById("main").style.display="none";
+    showEnding();
     return;
   }
 
-  document.getElementById("photo").src=photos[index];
-  document.getElementById("text").textContent=texts[index];
-  index++;
+  const img=document.getElementById("photo");
+  img.style.opacity=0;
+
+  setTimeout(()=>{
+    img.src=photos[index];
+    img.style.transform="scale(1.08)";
+    img.style.opacity=1;
+    document.getElementById("text").innerText=texts[index];
+    index++;
+  },500);
+}
+
+function fadeInMusic(){
+  const music=document.getElementById("music");
+  music.volume=0;
+  music.play().catch(()=>{});
+  let fade=setInterval(()=>{
+    if(music.volume<1){
+      music.volume+=0.05;
+    } else clearInterval(fade);
+  },200);
+}
+
+function fadeOutMusic(){
+  const music=document.getElementById("music");
+  let fade=setInterval(()=>{
+    if(music.volume>0){
+      music.volume-=0.05;
+    } else {
+      music.pause();
+      clearInterval(fade);
+    }
+  },200);
+}
+
+function showEnding(){
+  const ending=document.getElementById("ending");
+  ending.style.display="flex";
+
+  setTimeout(()=>{
+    document.getElementById("finalLine").style.opacity=1;
+  },1500);
+
+  setTimeout(()=>{
+    document.getElementById("secretBtn").style.display="block";
+  },4000);
+}
+
+function secret(){
+  document.getElementById("ending").innerHTML=
+  "<h1>Thank you for being my home 🤍</h1>";
 }
 </script>
 
