@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+
 <title>Valentine</title>
 
 <style>
@@ -15,7 +16,7 @@ html,body{
   overflow:hidden;
 }
 
-/* FULLSCREEN */
+/* FULLSCREEN MOBILE */
 .app{
   position:relative;
   width:100vw;
@@ -73,12 +74,14 @@ canvas{
   background:linear-gradient(transparent, rgba(0,0,0,.65));
 }
 
+/* TEXT FIX HP */
 .text{
-  font-size:15px;
-  line-height:1.5;
+  font-size:16px;
+  line-height:1.6;
+  min-height:80px;
 }
 
-/* 🌸 BUNGA RAPII */
+/* 🌸 FLOWER RAPI */
 .flower{
   position:relative;
   width:200px;
@@ -140,14 +143,15 @@ canvas{
   <h3>Still with you, always 🤍</h3>
 </div>
 
+<!-- AUDIO -->
 <audio id="music" src="lagu.mp3" loop playsinline muted></audio>
 
 </div>
 
 <script>
-/* =================
-   CANVAS HEART
-================= */
+/* =========================
+   CANVAS HEART EFFECT
+========================= */
 const canvas=document.getElementById('fx');
 const ctx=canvas.getContext('2d');
 
@@ -178,9 +182,9 @@ function draw(){
 }
 draw();
 
-/* =================
-   SLIDESHOW TIMING 1:23
-================= */
+/* =========================
+   SLIDESHOW + TIMING
+========================= */
 const photos=["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg","foto5.jpg"];
 const texts=[
 "Terima kasih sudah selalu ada.",
@@ -190,7 +194,7 @@ const texts=[
 "Still with you, always."
 ];
 
-const TOTAL_TIME = 83000; // 83 detik
+const TOTAL_TIME = 83000; // 1 menit 23 detik
 const DURATION = TOTAL_TIME / photos.length;
 
 const opening=document.getElementById('opening');
@@ -202,54 +206,62 @@ const music=document.getElementById('music');
 
 let i=0;
 
-/* TYPE EFFECT */
+/* TYPEWRITER (HP SAFE) */
 function typeText(t){
- typed.textContent="";
- let k=0;
- const iv=setInterval(()=>{
-   typed.textContent+=t[k++]||"";
-   if(k>=t.length)clearInterval(iv);
- },18);
+  typed.textContent="";
+  let k=0;
+
+  function animate(){
+    if(k < t.length){
+      typed.textContent += t[k++];
+      requestAnimationFrame(animate);
+    }
+  }
+  animate();
 }
 
 /* SLIDE LOOP */
 function next(){
- if(i>=photos.length){
-   slide.style.display="none";
-   closing.style.display="flex";
-   buildFlower();
-   return;
- }
+  if(i>=photos.length){
+    slide.style.display="none";
+    closing.style.display="flex";
+    buildFlower();
+    return;
+  }
 
- photo.src=photos[i];
- typeText(texts[i]);
- i++;
- setTimeout(next,DURATION);
+  photo.src=photos[i];
+  typeText(texts[i]);
+  i++;
+  setTimeout(next,DURATION);
 }
 
-/* 🌸 FLOWER RAPI */
+/* =========================
+   FLOWER ANIMATION
+========================= */
 function buildFlower(){
- const f=document.getElementById('flower');
+  const f=document.getElementById('flower');
 
- for(let j=0;j<10;j++){
-   const p=document.createElement('div');
-   p.className="petal";
-   f.appendChild(p);
+  for(let j=0;j<10;j++){
+    const p=document.createElement('div');
+    p.className="petal";
+    f.appendChild(p);
 
-   const angle=(360/10)*j;
+    const angle=(360/10)*j;
 
-   setTimeout(()=>{
-     p.style.opacity=1;
-     p.style.transform=`rotate(${angle}deg) translateX(70px)`;
-   },j*120);
- }
+    setTimeout(()=>{
+      p.style.opacity=1;
+      p.style.transform=`rotate(${angle}deg) translateX(70px)`;
+    },j*120);
+  }
 
- const c=document.createElement('div');
- c.className="center";
- f.appendChild(c);
+  const c=document.createElement('div');
+  c.className="center";
+  f.appendChild(c);
 }
 
-/* AUDIO SAFE START */
+/* =========================
+   START (AUDIO SAFE)
+========================= */
 addEventListener('click',()=>{
   music.muted=false;
   music.play().catch(()=>{});
