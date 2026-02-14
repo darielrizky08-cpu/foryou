@@ -21,7 +21,7 @@ html,body{
   overflow:hidden;
 }
 
-/* BG */
+/* BACKGROUND */
 .bg{
   position:absolute;
   inset:0;
@@ -33,12 +33,14 @@ html,body{
   to{filter:brightness(1.15)}
 }
 
+/* CANVAS */
 canvas{
   position:absolute;
   inset:0;
-  pointer-events:none;
+  pointer-events:none; /* supaya tidak blok klik */
 }
 
+/* LAYER */
 .layer{
   position:absolute;
   inset:0;
@@ -51,6 +53,7 @@ canvas{
   padding:20px;
 }
 
+/* FOTO */
 .circle{
   width:min(75vw,320px);
   height:min(75vw,320px);
@@ -66,6 +69,7 @@ canvas{
   object-fit:cover;
 }
 
+/* PANEL */
 .panel{
   position:absolute;
   bottom:0;
@@ -83,34 +87,12 @@ canvas{
   line-height:1.7;
   white-space:pre-wrap;
 }
-
-.flower{
-  position:relative;
-  width:200px;
-  height:200px;
-}
-.petal{
-  position:absolute;
-  width:60px;
-  height:24px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#ff9fc4,#ffd7ea);
-  transform-origin:center;
-}
-.center{
-  position:absolute;
-  top:50%;left:50%;
-  width:36px;height:36px;
-  border-radius:50%;
-  background:#ffe3a3;
-  transform:translate(-50%,-50%);
-}
 </style>
 </head>
 
 <body>
-<div class="app">
 
+<div class="app">
 <div class="bg"></div>
 <canvas id="fx"></canvas>
 
@@ -123,38 +105,25 @@ canvas{
   <div class="circle">
     <img id="photo" src="foto1.jpg">
   </div>
-
   <div class="panel">
     <div id="typed" class="text"></div>
   </div>
 </div>
 
-<div class="layer" id="closing" style="display:none">
-  <div id="flower" class="flower"></div>
-  <h3>Still with you, always 🤍</h3>
-</div>
-
-<audio id="music" src="lagu.mp3" loop playsinline></audio>
+<!-- 🔥 AUDIO FIX (PRELOAD + SOURCE) -->
+<audio id="music" preload="auto" loop>
+  <source src="lagu.mp3" type="audio/mpeg">
+</audio>
 
 </div>
-
 
 <script>
 /* ======================
-   AMBIL ELEMENT (FIX)
+   CANVAS EFFECT
 ====================== */
 const canvas = document.getElementById("fx");
-const opening = document.getElementById("opening");
-const slide = document.getElementById("slide");
-const typed = document.getElementById("typed");
-const music = document.getElementById("music");
-
 const ctx = canvas.getContext("2d");
 
-
-/* ======================
-   CANVAS HEART EFFECT
-====================== */
 function resize(){
   canvas.width = innerWidth;
   canvas.height = innerHeight;
@@ -163,42 +132,61 @@ resize();
 addEventListener("resize", resize);
 
 const hearts = Array.from({length:40},()=>({
-  x:Math.random()*canvas.width,
-  y:Math.random()*canvas.height,
-  s:Math.random()*1+0.4
+ x:Math.random()*canvas.width,
+ y:Math.random()*canvas.height,
+ s:Math.random()*1+0.4
 }));
 
 function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  hearts.forEach(h=>{
-    h.y-=h.s;
-    if(h.y<0) h.y=canvas.height;
-    ctx.fillStyle="#ffb6d5";
-    ctx.fillRect(h.x,h.y,3,3);
-  });
-  requestAnimationFrame(draw);
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ hearts.forEach(h=>{
+  h.y-=h.s;
+  if(h.y<0) h.y=canvas.height;
+  ctx.fillStyle="#ffb6d5";
+  ctx.fillRect(h.x,h.y,3,3);
+ });
+
+ requestAnimationFrame(draw);
 }
 draw();
 
 
 /* ======================
-   TYPING TEXT
+   TEXT + MUSIC FIX HP
 ====================== */
-const text=`first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
+const opening = document.getElementById("opening");
+const slide   = document.getElementById("slide");
+const typed   = document.getElementById("typed");
+const music   = document.getElementById("music");
+
+const text = `first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
+lewat hal-hal kecil yang bahkan aku sendiri ga sadar, contohnya kaya ada kamu didalamnya.
+
+being with you taught me that love doesn't have to be loud.
+sometimes it's quiet, warm, and steady.
+
 still with you, always 🤍`;
 
 
-/* ======================
-   START (HP + DESKTOP)
-====================== */
-function start(){
+/* 🔥 START FUNCTION (FIX MOBILE AUDIO) */
+function start(e){
+
+  e.preventDefault();
 
   opening.style.display="none";
   slide.style.display="flex";
 
-  music.muted=false;
-  music.play().catch(()=>{});
+  /* paksa play biar HP bunyi */
+  music.currentTime = 0;
+  music.muted = false;
 
+  const p = music.play();
+  if(p !== undefined){
+    p.catch(()=>{});
+  }
+
+  /* efek ketik */
   let i=0;
   const iv=setInterval(()=>{
     typed.textContent+=text[i++]||"";
@@ -206,8 +194,9 @@ function start(){
   },18);
 }
 
-opening.addEventListener("click",start);
-opening.addEventListener("touchstart",start);
+/* penting: touchstart untuk HP */
+opening.addEventListener("touchstart", start, {once:true});
+opening.addEventListener("click", start, {once:true});
 </script>
 
 </body>
