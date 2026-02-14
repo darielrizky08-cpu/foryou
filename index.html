@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
 <title>Valentine</title>
 
 <style>
@@ -11,62 +10,110 @@ html,body{
   margin:0;
   height:100%;
   background:#111;
-  overflow:hidden;
   font-family:system-ui;
+  overflow:hidden;
 }
 
 .app{
   position:relative;
   width:100vw;
   height:100vh;
+  overflow:hidden;
 }
 
+/* ======================
+   BACKGROUND GLOW
+====================== */
+.bg{
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at 50% 20%, #ffe6f0, #e6a9c8 60%, #b983a6);
+  animation: glow 6s ease-in-out infinite alternate;
+}
+@keyframes glow{
+  from{filter:brightness(1)}
+  to{filter:brightness(1.15)}
+}
+
+/* CANVAS */
 canvas{
   position:absolute;
   inset:0;
-  pointer-events:none; /* ⭐ penting */
 }
 
+/* LAYER */
 .layer{
   position:absolute;
   inset:0;
   display:flex;
+  flex-direction:column;
   justify-content:center;
   align-items:center;
-  flex-direction:column;
-  color:white;
   text-align:center;
-  z-index:2;
+  color:white;
+  padding:20px;
 }
 
-/* foto */
+/* FOTO */
 .circle{
-  width:260px;
-  height:260px;
+  width:min(75vw,320px);
+  height:min(75vw,320px);
   border-radius:50%;
   overflow:hidden;
-  border:5px solid white;
+  border:5px solid rgba(255,255,255,.8);
+  box-shadow:0 0 40px rgba(255,150,200,.7);
+  transition:opacity 1s;
 }
+
 .circle img{
   width:100%;
   height:100%;
   object-fit:cover;
 }
 
+/* PANEL */
 .panel{
   position:absolute;
   bottom:0;
   left:0;
   right:0;
-  background:rgba(0,0,0,.6);
-  padding:18px;
+  padding:20px;
+  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(8px);
   max-height:45vh;
-  overflow:auto;
+  overflow-y:auto;
 }
 
 .text{
+  font-size:15px;
+  line-height:1.7;
   white-space:pre-wrap;
-  font-size:14px;
+}
+
+/* FLOWER */
+.flower{
+  position:relative;
+  width:200px;
+  height:200px;
+}
+
+.petal{
+  position:absolute;
+  width:60px;
+  height:24px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ff9fc4,#ffd7ea);
+  transform-origin:center;
+  transition:transform .6s ease;
+}
+
+.center{
+  position:absolute;
+  top:50%;left:50%;
+  width:36px;height:36px;
+  border-radius:50%;
+  background:#ffe3a3;
+  transform:translate(-50%,-50%);
 }
 </style>
 </head>
@@ -74,14 +121,15 @@ canvas{
 <body>
 
 <div class="app">
-
+<div class="bg"></div>
 <canvas id="fx"></canvas>
 
-<div id="opening" class="layer">
-  <h2>Tap untuk mulai 🤍</h2>
+<div class="layer" id="opening">
+  <h2>From me → For you 🤍</h2>
+  <small>Tap layar untuk mulai</small>
 </div>
 
-<div id="slide" class="layer" style="display:none">
+<div class="layer" id="slide" style="display:none">
   <div class="circle">
     <img id="photo" src="foto1.jpg">
   </div>
@@ -90,80 +138,166 @@ canvas{
   </div>
 </div>
 
-<audio id="music" src="lagu.mp3" loop></audio>
+<div class="layer" id="closing" style="display:none">
+  <div id="flower" class="flower"></div>
+  <h3>Still with you, always 🤍</h3>
+</div>
 
+<audio id="music" src="lagu.mp3" loop playsinline></audio>
 </div>
 
 <script>
-/* ================= FIX ELEMENT ================= */
-const canvas = document.getElementById("fx");
-const ctx = canvas.getContext("2d");
+/* ======================
+   CANVAS HEART + STARS
+====================== */
+const canvas=fx;
+const ctx=canvas.getContext("2d");
 
-const opening = document.getElementById("opening");
-const slide = document.getElementById("slide");
-const photo = document.getElementById("photo");
-const typed = document.getElementById("typed");
-const music = document.getElementById("music");
-
-/* ================= CANVAS ================= */
 function resize(){
- canvas.width=innerWidth;
- canvas.height=innerHeight;
+  canvas.width=innerWidth;
+  canvas.height=innerHeight;
 }
 resize();
 addEventListener("resize",resize);
 
-const hearts = Array.from({length:30},()=>({
+const hearts=Array.from({length:40},()=>({
  x:Math.random()*canvas.width,
  y:Math.random()*canvas.height,
- s:Math.random()*1+0.5
+ s:Math.random()*1+0.4
 }));
+
+const stars=Array.from({length:40},()=>({
+ x:Math.random()*canvas.width,
+ y:Math.random()*canvas.height,
+ a:Math.random()
+}));
+
+function heart(x,y,size){
+ ctx.beginPath();
+ ctx.moveTo(x,y);
+ ctx.bezierCurveTo(x,y-3*size,x-5*size,y-3*size,x-5*size,y);
+ ctx.bezierCurveTo(x-5*size,y+3*size,x,y+4*size,x,y+6*size);
+ ctx.bezierCurveTo(x,y+4*size,x+5*size,y+3*size,x+5*size,y);
+ ctx.bezierCurveTo(x+5*size,y-3*size,x,y-3*size,x,y);
+ ctx.fill();
+}
 
 function draw(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
- hearts.forEach(h=>{
-   h.y-=h.s;
-   if(h.y<0) h.y=canvas.height;
-   ctx.fillStyle="#ffc2da";
-   ctx.beginPath();
-   ctx.arc(h.x,h.y,3,0,6.28);
-   ctx.fill();
+
+ stars.forEach(s=>{
+  s.a+=0.02;
+  ctx.globalAlpha=(Math.sin(s.a)+1)/2;
+  ctx.fillStyle="white";
+  ctx.fillRect(s.x,s.y,2,2);
  });
+
+ hearts.forEach(h=>{
+  h.y-=h.s;
+  if(h.y<0) h.y=canvas.height;
+  ctx.globalAlpha=.9;
+  ctx.fillStyle="#ffb6d5";
+  heart(h.x,h.y,2);
+ });
+
+ ctx.globalAlpha=1;
  requestAnimationFrame(draw);
 }
 draw();
 
-/* ================= SLIDES ================= */
+/* ======================
+   SLIDESHOW + TEXT
+====================== */
 const photos=["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg","foto5.jpg"];
-let idx=0;
 
-setInterval(()=>{
- photo.src=photos[idx%photos.length];
- idx++;
-},5000);
+const text=`first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
+lewat hal-hal kecil yang bahkan aku sendiri ga sadar, contohnya kaya ada kamu didalamnya.
 
-/* ================= TEXT ================= */
-const text="Still with you, always 🤍";
+mungkin keliatan ga bermakna ya? tapi serius, hari ini bukan sekedar hari kasih sayang.
+tapi hari dimana aku ngerayain rasa syukur karena semesta ngenalin aku ke kamu.
 
+being with you taught me that love doesn't have to be loud.
+sometimes it's quiet, warm, and steady.
+
+so today, i celebrate you. us.
+still with you, always 🤍`;
+
+const photoEl=photo;
+const typed=typed;
+const music=music;
+
+let p=0;
+
+/* FOTO FADE */
+function nextPhoto(){
+ photoEl.style.opacity=0;
+ setTimeout(()=>{
+   photoEl.src=photos[p%photos.length];
+   photoEl.style.opacity=1;
+   p++;
+ },500);
+}
+setInterval(nextPhoto,6000);
+
+/* TYPE */
 function typeText(){
  let i=0;
  const iv=setInterval(()=>{
-   typed.textContent+=text[i++]||"";
-   if(i>=text.length) clearInterval(iv);
- },40);
+  typed.textContent+=text[i++]||"";
+  typed.scrollTop=typed.scrollHeight;
+  if(i>=text.length) clearInterval(iv);
+ },18);
 }
 
-/* ================= START ================= */
-function start(){
+/* FLOWER */
+function buildFlower(){
+ const f=flower;
+ const n=10;
+ const r=70;
+
+ for(let i=0;i<n;i++){
+  const p=document.createElement("div");
+  p.className="petal";
+  const a=(360/n)*i;
+  const x=Math.cos(a*Math.PI/180)*r;
+  const y=Math.sin(a*Math.PI/180)*r;
+  p.style.left="50%";
+  p.style.top="50%";
+  p.style.transform=`translate(${x}px,${y}px) scale(0)`;
+  f.appendChild(p);
+
+  setTimeout(()=>p.style.transform=`translate(${x}px,${y}px) scale(1)`,i*120);
+ }
+
+ const c=document.createElement("div");
+ c.className="center";
+ f.appendChild(c);
+}
+
+/* MUSIC FADE IN */
+function fadeMusic(){
+ music.volume=0;
+ music.play();
+ const iv=setInterval(()=>{
+  music.volume+=0.05;
+  if(music.volume>=1) clearInterval(iv);
+ },200);
+}
+
+/* START */
+opening.onclick=()=>{
  opening.style.display="none";
  slide.style.display="flex";
-
- music.play().catch(()=>{});
+ fadeMusic();
  typeText();
-}
 
-opening.addEventListener("click",start,{once:true});
-opening.addEventListener("touchstart",start,{once:true});
+ /* total 83 detik */
+ setTimeout(()=>{
+   slide.style.display="none";
+   closing.style.display="flex";
+   buildFlower();
+ },83000);
+};
 </script>
 
 </body>
