@@ -19,7 +19,7 @@ body{
   overflow:hidden;
 }
 
-/* Glow lembut di tengah */
+/* Glow tengah */
 body::after{
   content:"";
   position:fixed;
@@ -30,7 +30,20 @@ body::after{
   pointer-events:none;
 }
 
-/* DREAMY HEART BACKGROUND */
+/* Soft glow bawah */
+body::before{
+  content:"";
+  position:fixed;
+  bottom:0;
+  width:100%;
+  height:150px;
+  background:linear-gradient(to top,
+            rgba(255,105,180,0.35),
+            transparent);
+  pointer-events:none;
+}
+
+/* HEARTS */
 .hearts{
   position:fixed;
   width:100%;
@@ -48,8 +61,8 @@ body::after{
 }
 
 @keyframes float{
-  from{transform:translateY(110vh) scale(1);}
-  to{transform:translateY(-10vh) scale(1.2);}
+  from{transform:translateY(110vh);}
+  to{transform:translateY(-10vh);}
 }
 
 /* SECTIONS */
@@ -102,6 +115,37 @@ button{
   cursor:pointer;
 }
 
+/* Bottom Quote */
+#bottomQuote{
+  position:fixed;
+  bottom:55px;
+  width:100%;
+  text-align:center;
+  font-size:13px;
+  letter-spacing:2px;
+  opacity:0;
+  animation: fadeBottom 4s ease forwards;
+  animation-delay:8s;
+  z-index:2;
+}
+
+@keyframes fadeBottom{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:0.85; transform:translateY(0);}
+}
+
+/* Love Bar */
+#loveBar{
+  position:fixed;
+  bottom:15px;
+  width:100%;
+  text-align:center;
+  font-size:18px;
+  letter-spacing:6px;
+  opacity:0.7;
+  z-index:2;
+}
+
 #ending{
   display:none;
   background:black;
@@ -122,6 +166,9 @@ button{
 
 <div class="hearts" id="hearts"></div>
 
+<div id="bottomQuote">you are my safe place 🤍</div>
+<div id="loveBar">♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡</div>
+
 <div id="opening">
   <h2>Before you press start… 🤍</h2>
   <button onclick="startShow()">Ready?</button>
@@ -134,9 +181,6 @@ button{
 
 <div id="ending">
   <h1 id="finalLine">Still with you.<br>Always.</h1>
-  <button onclick="secret()" id="secretBtn" style="display:none;">
-    One more thing…
-  </button>
 </div>
 
 <audio id="music" src="lagu.mp3"></audio>
@@ -183,9 +227,7 @@ i never knew i needed this much.`
 
 let index=0;
 let interval;
-let typingTimeout;
 
-/* CREATE HEARTS */
 function createHearts(){
   const container=document.getElementById("hearts");
   for(let i=0;i<40;i++){
@@ -195,7 +237,6 @@ function createHearts(){
     heart.style.left=Math.random()*100+"%";
     heart.style.fontSize=(12+Math.random()*18)+"px";
     heart.style.animationDuration=(8+Math.random()*8)+"s";
-    heart.style.opacity=Math.random()*0.6;
     container.appendChild(heart);
   }
 }
@@ -204,86 +245,31 @@ createHearts();
 function startShow(){
   document.getElementById("opening").style.display="none";
   document.getElementById("main").style.display="block";
-  fadeInMusic();
+  document.getElementById("music").play().catch(()=>{});
   showSlide();
-  interval=setInterval(showSlide,16500);
+  interval=setInterval(showSlide,16600);
 }
 
 function showSlide(){
   if(index>=photos.length){
     clearInterval(interval);
-    fadeOutMusic();
     document.getElementById("main").style.display="none";
-    showEnding();
+    document.getElementById("ending").style.display="flex";
     return;
   }
 
   const img=document.getElementById("photo");
   const textEl=document.getElementById("text");
 
-  clearTimeout(typingTimeout);
-  textEl.innerHTML="";
   img.style.opacity=0;
+  textEl.innerHTML="";
 
   setTimeout(()=>{
     img.src=photos[index];
-    img.style.transform="scale(1.08)";
     img.style.opacity=1;
-    typeWriter(texts[index],textEl);
+    textEl.innerHTML=texts[index];
     index++;
   },500);
-}
-
-function typeWriter(text,element){
-  let i=0;
-  function typing(){
-    if(i<text.length){
-      element.innerHTML+=text.charAt(i);
-      i++;
-      typingTimeout=setTimeout(typing,30);
-    }
-  }
-  typing();
-}
-
-function fadeInMusic(){
-  const music=document.getElementById("music");
-  music.volume=0;
-  music.play().catch(()=>{});
-  let fade=setInterval(()=>{
-    if(music.volume<1){
-      music.volume+=0.05;
-    } else clearInterval(fade);
-  },200);
-}
-
-function fadeOutMusic(){
-  const music=document.getElementById("music");
-  let fade=setInterval(()=>{
-    if(music.volume>0){
-      music.volume-=0.05;
-    } else {
-      music.pause();
-      clearInterval(fade);
-    }
-  },200);
-}
-
-function showEnding(){
-  const ending=document.getElementById("ending");
-  ending.style.display="flex";
-
-  const finalLine=document.getElementById("finalLine");
-  finalLine.classList.add("glow");
-
-  setTimeout(()=>{
-    document.getElementById("secretBtn").style.display="block";
-  },4000);
-}
-
-function secret(){
-  document.getElementById("ending").innerHTML=
-  "<h1 class='glow'>Thank you for being my home 🤍</h1>";
 }
 </script>
 
