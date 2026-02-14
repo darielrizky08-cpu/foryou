@@ -30,7 +30,7 @@ body::after{
   pointer-events:none;
 }
 
-/* Soft glow bawah */
+/* Glow bawah */
 body::before{
   content:"";
   position:fixed;
@@ -90,7 +90,7 @@ img{
   border-radius:50%;
   margin-top:40px;
   opacity:0;
-  transition:opacity 1.5s ease, transform 16s ease;
+  transition:opacity 1.5s ease;
   box-shadow:0 0 40px rgba(255,255,255,0.6);
 }
 
@@ -115,12 +115,11 @@ button{
   cursor:pointer;
 }
 
-/* Bottom Quote */
+/* Bottom quote */
 #bottomQuote{
   position:fixed;
   bottom:55px;
   width:100%;
-  text-align:center;
   font-size:13px;
   letter-spacing:2px;
   opacity:0;
@@ -134,30 +133,33 @@ button{
   to{opacity:0.85; transform:translateY(0);}
 }
 
-/* Love Bar */
+/* Love bar */
 #loveBar{
   position:fixed;
   bottom:15px;
   width:100%;
-  text-align:center;
   font-size:18px;
   letter-spacing:6px;
   opacity:0.7;
   z-index:2;
 }
 
+/* Ending cinematic */
 #ending{
   display:none;
   background:black;
 }
 
-.glow{
-  animation: glowEffect 2s ease forwards;
+#cinematicText{
+  font-size:22px;
+  opacity:0;
+  transition:opacity 2s ease;
 }
 
-@keyframes glowEffect{
-  from{opacity:0; text-shadow:0 0 0px white;}
-  to{opacity:1; text-shadow:0 0 20px white, 0 0 40px white;}
+.bigGlow{
+  font-size:32px;
+  font-weight:bold;
+  text-shadow:0 0 20px white, 0 0 40px white;
 }
 </style>
 </head>
@@ -165,9 +167,8 @@ button{
 <body>
 
 <div class="hearts" id="hearts"></div>
-
 <div id="bottomQuote">you are my safe place 🤍</div>
-<div id="loveBar">♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡</div>
+<div id="loveBar">♡ ♡ ♡ ♡ ♡ Eca ♡ ♡ ♡ ♡ ♡</div>
 
 <div id="opening">
   <h2>Before you press start… 🤍</h2>
@@ -180,7 +181,7 @@ button{
 </div>
 
 <div id="ending">
-  <h1 id="finalLine">Still with you.<br>Always.</h1>
+  <div id="cinematicText"></div>
 </div>
 
 <audio id="music" src="lagu.mp3"></audio>
@@ -254,7 +255,7 @@ function showSlide(){
   if(index>=photos.length){
     clearInterval(interval);
     document.getElementById("main").style.display="none";
-    document.getElementById("ending").style.display="flex";
+    showCinematicEnding();
     return;
   }
 
@@ -270,6 +271,32 @@ function showSlide(){
     textEl.innerHTML=texts[index];
     index++;
   },500);
+}
+
+function showCinematicEnding(){
+  const ending=document.getElementById("ending");
+  const text=document.getElementById("cinematicText");
+
+  ending.style.display="flex";
+
+  setTimeout(()=>{
+    text.innerHTML="if i could choose again…";
+    text.style.opacity=1;
+  },1000);
+
+  setTimeout(()=>{ text.style.opacity=0; },4000);
+
+  setTimeout(()=>{
+    text.innerHTML="<span class='bigGlow'>I would still choose you.</span>";
+    text.style.opacity=1;
+  },6000);
+
+  setTimeout(()=>{ text.style.opacity=0; },11000);
+
+  setTimeout(()=>{
+    text.innerHTML="in every lifetime 🤍";
+    text.style.opacity=1;
+  },13000);
 }
 </script>
 
