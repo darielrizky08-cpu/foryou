@@ -6,6 +6,20 @@
 <title>Still With You 🤍</title>
 
 <style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background: radial-gradient(circle at 50% 30%, 
+              #ffd6e8 0%, 
+              #ffb6d5 40%, 
+              #ff8fc4 70%, 
+              #e754a6 100%);
+  color:white;
+  text-align:center;
+  overflow:hidden;
+}
+
+/* Glow lembut di tengah */
 body::after{
   content:"";
   position:fixed;
@@ -15,6 +29,7 @@ body::after{
               transparent 60%);
   pointer-events:none;
 }
+
 /* DREAMY HEART BACKGROUND */
 .hearts{
   position:fixed;
@@ -28,7 +43,7 @@ body::after{
 .heart{
   position:absolute;
   color:white;
-  opacity:0.5;
+  opacity:0.6;
   animation: float linear infinite;
 }
 
@@ -63,7 +78,7 @@ img{
   margin-top:40px;
   opacity:0;
   transition:opacity 1.5s ease, transform 16s ease;
-  box-shadow:0 0 40px rgba(255,255,255,0.5);
+  box-shadow:0 0 40px rgba(255,255,255,0.6);
 }
 
 #text{
@@ -72,9 +87,10 @@ img{
   line-height:1.8;
   margin-top:25px;
   white-space:pre-line;
-  background:rgba(0,0,0,0.5);
+  background:rgba(0,0,0,0.4);
   padding:20px;
   border-radius:20px;
+  backdrop-filter:blur(6px);
 }
 
 button{
@@ -169,7 +185,7 @@ let index=0;
 let interval;
 let typingTimeout;
 
-/* CREATE DREAMY HEARTS */
+/* CREATE HEARTS */
 function createHearts(){
   const container=document.getElementById("hearts");
   for(let i=0;i<40;i++){
@@ -273,4 +289,3 @@ function secret(){
 
 </body>
 </html>
-
