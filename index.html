@@ -104,6 +104,8 @@ img{
   padding:20px;
   border-radius:20px;
   backdrop-filter:blur(6px);
+  max-height:250px;
+  overflow-y:auto;
 }
 
 button{
@@ -168,7 +170,7 @@ button{
 
 <div class="hearts" id="hearts"></div>
 <div id="bottomQuote">you are my safe place 🤍</div>
-<div id="loveBar">♡ ♡ ♡ ♡ ♡ Eca ♡ ♡ ♡ ♡ ♡</div>
+<div id="loveBar">♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡</div>
 
 <div id="opening">
   <h2>Before you press start… 🤍</h2>
@@ -229,6 +231,7 @@ i never knew i needed this much.`
 let index=0;
 let interval;
 
+/* Floating hearts */
 function createHearts(){
   const container=document.getElementById("hearts");
   for(let i=0;i<40;i++){
@@ -243,6 +246,7 @@ function createHearts(){
 }
 createHearts();
 
+/* Start */
 function startShow(){
   document.getElementById("opening").style.display="none";
   document.getElementById("main").style.display="block";
@@ -251,6 +255,33 @@ function startShow(){
   interval=setInterval(showSlide,16600);
 }
 
+/* Typewriter Natural */
+function typeWriter(text, element, speed = 35){
+  let i = 0;
+  element.innerHTML = "";
+
+  function typing(){
+    if(i < text.length){
+      element.innerHTML += text.charAt(i);
+      element.scrollTop = element.scrollHeight;
+
+      let delay = speed;
+      if(text.charAt(i) === "." || text.charAt(i) === "…"){
+        delay = 300;
+      }
+      if(text.charAt(i) === "\n"){
+        delay = 200;
+      }
+
+      i++;
+      setTimeout(typing, delay);
+    }
+  }
+
+  typing();
+}
+
+/* Slide */
 function showSlide(){
   if(index>=photos.length){
     clearInterval(interval);
@@ -268,11 +299,12 @@ function showSlide(){
   setTimeout(()=>{
     img.src=photos[index];
     img.style.opacity=1;
-    textEl.innerHTML=texts[index];
+    typeWriter(texts[index], textEl, 30);
     index++;
   },500);
 }
 
+/* Cinematic Ending */
 function showCinematicEnding(){
   const ending=document.getElementById("ending");
   const text=document.getElementById("cinematicText");
