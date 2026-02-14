@@ -1,60 +1,26 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For You 🤍</title>
-
 <style>
-html,body{
+body{
   margin:0;
-  height:100%;
   background:#000;
   font-family:system-ui;
   overflow:hidden;
 }
-
 .app{
   position:relative;
   width:100vw;
   height:100vh;
-  overflow:hidden;
 }
-
-/* background */
 .bg{
   position:absolute;
   inset:0;
   background: radial-gradient(circle at 50% 20%, #ffe6f0, #e6a9c8 60%, #b983a6);
-  animation: glow 6s ease-in-out infinite alternate;
-  transition:opacity 2s ease;
-  z-index:0;
 }
-@keyframes glow{
-  from{filter:brightness(1)}
-  to{filter:brightness(1.15)}
-}
-
-canvas,
-.flash,
-.ending{
-  pointer-events:none;
-}
-
-canvas{
-  position:absolute;
-  inset:0;
-  z-index:1;
-}
-
-.flash{
-  position:absolute;
-  inset:0;
-  background:white;
-  opacity:0;
-  z-index:5;
-}
-
 .layer{
   position:absolute;
   inset:0;
@@ -65,226 +31,81 @@ canvas{
   text-align:center;
   color:white;
   padding:20px;
-  z-index:10;
 }
-
 .circle{
   width:min(75vw,320px);
   height:min(75vw,320px);
   border-radius:50%;
   overflow:hidden;
   border:5px solid rgba(255,255,255,.8);
-  box-shadow:0 0 40px rgba(255,150,200,.7);
+  margin-bottom:20px;
 }
-
 .circle img{
   width:100%;
   height:100%;
   object-fit:cover;
-  transition:opacity 1s ease, transform 8s ease;
 }
-
 .panel{
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  padding:20px;
   background:rgba(0,0,0,.5);
-  backdrop-filter:blur(8px);
-  max-height:45vh;
-  overflow-y:auto;
+  padding:15px;
+  border-radius:10px;
+  max-width:90%;
 }
-
-.text{
-  font-size:15px;
-  line-height:1.7;
-  white-space:pre-wrap;
-}
-
-.ending{
-  position:absolute;
-  inset:0;
-  background:#000;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  color:white;
-  opacity:0;
-  transition:opacity 2s ease;
-  z-index:20;
-}
-
-#nameLine{
-  font-size:24px;
-  margin-bottom:15px;
-  text-shadow:0 0 15px rgba(255,180,220,.8);
+button{
+  padding:10px 20px;
+  border:none;
+  border-radius:20px;
+  margin-top:15px;
+  font-size:14px;
 }
 </style>
 </head>
-
 <body>
+
 <div class="app">
+<div class="bg"></div>
 
-<div class="bg" id="bg"></div>
-<div class="flash" id="flash"></div>
-<canvas id="fx"></canvas>
-
-<div class="layer" id="opening">
-  <h2>From me → For you 🤍</h2>
-  <small>Tap / Click untuk mulai</small>
+<div class="layer" id="setup">
+<h3>Pilih Foto & Lagu 🤍</h3>
+<input type="file" id="photoInput" accept="image/*"><br><br>
+<input type="file" id="musicInput" accept="audio/*"><br>
+<button onclick="start()">Mulai</button>
 </div>
 
-<div class="layer" id="slide" style="display:none">
-  <div class="circle">
-    <img id="photo" src="foto1.jpg">
-  </div>
-  <div class="panel">
-    <div id="typed" class="text"></div>
-  </div>
+<div class="layer" id="main" style="display:none;">
+<div class="circle">
+<img id="photo">
+</div>
+<div class="panel">
+first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
+</div>
 </div>
 
-<div class="ending" id="ending">
-  <div id="nameLine"></div>
-  <div>Still with you, always 🤍</div>
-</div>
-
-<audio id="music" src="lagu.mp3" playsinline preload="auto"></audio>
+<audio id="music"></audio>
 
 </div>
 
 <script>
-const herName="NamaDia"; // ganti nama dia 🤍
-const photos=["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg","foto5.jpg"];
+function start(){
+  const photoFile = document.getElementById("photoInput").files[0];
+  const musicFile = document.getElementById("musicInput").files[0];
 
-const texts=[
-"Slide 1 text...",
-"Slide 2 text...",
-"Slide 3 text...",
-"Slide 4 text...",
-"Slide 5 text..."
-];
-
-const opening=document.getElementById("opening");
-const slide=document.getElementById("slide");
-const photo=document.getElementById("photo");
-const typed=document.getElementById("typed");
-const music=document.getElementById("music");
-const ending=document.getElementById("ending");
-const nameLine=document.getElementById("nameLine");
-const flash=document.getElementById("flash");
-const bg=document.getElementById("bg");
-
-let index=0;
-let started=false;
-let interval;
-
-/* START FIX */
-async function startApp(){
-  if(started) return;
-  started=true;
-
-  opening.style.display="none";
-  slide.style.display="flex";
-
-  music.volume=1;
-
-  try{
-    await music.play();
-  }catch(e){
-    console.log("Autoplay blocked but handled");
-  }
-
-  nextSlide();
-  interval=setInterval(nextSlide,6000);
-}
-
-opening.addEventListener("click",startApp);
-
-/* SLIDES */
-function nextSlide(){
-  if(index>=photos.length){
-    finish();
+  if(!photoFile || !musicFile){
+    alert("Pilih foto & lagu dulu 🤍");
     return;
   }
 
-  photo.style.opacity=0;
+  const photoURL = URL.createObjectURL(photoFile);
+  const musicURL = URL.createObjectURL(musicFile);
 
-  setTimeout(()=>{
-    photo.src=photos[index];
-    photo.style.transform="scale(1.08)";
-    photo.style.opacity=1;
-    typed.textContent=texts[index];
-    index++;
-  },800);
+  document.getElementById("photo").src = photoURL;
+  document.getElementById("music").src = musicURL;
+
+  document.getElementById("setup").style.display="none";
+  document.getElementById("main").style.display="flex";
+
+  document.getElementById("music").play();
 }
-
-/* FINISH */
-function finish(){
-  clearInterval(interval);
-
-  flash.style.opacity=1;
-  setTimeout(()=>flash.style.opacity=0,300);
-
-  let fade=setInterval(()=>{
-    if(music.volume>0.05) music.volume-=0.05;
-    else clearInterval(fade);
-  },150);
-
-  setTimeout(()=>{
-    bg.style.opacity=0;
-    slide.style.opacity=0;
-    ending.style.opacity=1;
-    nameLine.textContent=herName+" 🤍";
-  },2500);
-}
-
-/* HEART FLOAT */
-const canvas=document.getElementById("fx");
-const ctx=canvas.getContext("2d");
-
-function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
-resize();addEventListener("resize",resize);
-
-function createHeart(){
-  return{
-    x:Math.random()*canvas.width,
-    y:Math.random()*canvas.height,
-    size:Math.random()*12+8,
-    speed:Math.random()*1+0.5,
-    alpha:Math.random()*0.5+0.5
-  }
-}
-
-let hearts=Array.from({length:30},()=>createHeart());
-
-function drawHeart(x,y,s,a){
-  ctx.save();
-  ctx.translate(x,y);
-  ctx.scale(s/20,s/20);
-  ctx.globalAlpha=a;
-  ctx.beginPath();
-  ctx.moveTo(0,0);
-  ctx.bezierCurveTo(0,-10,-20,-10,-20,5);
-  ctx.bezierCurveTo(-20,20,0,30,0,40);
-  ctx.bezierCurveTo(0,30,20,20,20,5);
-  ctx.bezierCurveTo(20,-10,0,-10,0,0);
-  ctx.fillStyle="#ff9ecf";
-  ctx.fill();
-  ctx.restore();
-}
-
-function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  hearts.forEach(h=>{
-    h.y-=h.speed;
-    if(h.y<-40) Object.assign(h,createHeart(),{y:canvas.height+40});
-    drawHeart(h.x,h.y,h.size,h.alpha);
-  });
-  requestAnimationFrame(animate);
-}
-animate();
 </script>
 
 </body>
