@@ -4,23 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For You 🤍</title>
+
 <style>
 body{
   margin:0;
-  background:#000;
   font-family:system-ui;
+  background:#000;
   overflow:hidden;
 }
+
 .app{
   position:relative;
   width:100vw;
   height:100vh;
 }
+
 .bg{
   position:absolute;
   inset:0;
   background: radial-gradient(circle at 50% 20%, #ffe6f0, #e6a9c8 60%, #b983a6);
+  animation: glow 6s ease-in-out infinite alternate;
 }
+
+@keyframes glow{
+  from{filter:brightness(1)}
+  to{filter:brightness(1.15)}
+}
+
 .layer{
   position:absolute;
   inset:0;
@@ -32,79 +42,96 @@ body{
   color:white;
   padding:20px;
 }
+
 .circle{
   width:min(75vw,320px);
   height:min(75vw,320px);
   border-radius:50%;
   overflow:hidden;
   border:5px solid rgba(255,255,255,.8);
+  box-shadow:0 0 40px rgba(255,150,200,.7);
   margin-bottom:20px;
 }
+
 .circle img{
   width:100%;
   height:100%;
   object-fit:cover;
+  transition:opacity 1s ease;
 }
+
 .panel{
   background:rgba(0,0,0,.5);
   padding:15px;
-  border-radius:10px;
+  border-radius:15px;
   max-width:90%;
 }
+
 button{
   padding:10px 20px;
   border:none;
   border-radius:20px;
-  margin-top:15px;
-  font-size:14px;
+  background:white;
+  font-weight:bold;
 }
 </style>
 </head>
-<body>
 
+<body>
 <div class="app">
+
 <div class="bg"></div>
 
-<div class="layer" id="setup">
-<h3>Pilih Foto & Lagu 🤍</h3>
-<input type="file" id="photoInput" accept="image/*"><br><br>
-<input type="file" id="musicInput" accept="audio/*"><br>
-<button onclick="start()">Mulai</button>
+<div class="layer" id="opening">
+  <h2>From me → For you 🤍</h2>
+  <button onclick="start()">Tap to Start</button>
 </div>
 
 <div class="layer" id="main" style="display:none;">
-<div class="circle">
-<img id="photo">
-</div>
-<div class="panel">
-first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
-</div>
+  <div class="circle">
+    <img id="photo" src="foto1.jpg">
+  </div>
+  <div class="panel" id="text"></div>
 </div>
 
-<audio id="music"></audio>
+<audio id="music" src="lagu.mp3"></audio>
 
 </div>
 
 <script>
-function start(){
-  const photoFile = document.getElementById("photoInput").files[0];
-  const musicFile = document.getElementById("musicInput").files[0];
+const photos=["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg","foto5.jpg"];
 
-  if(!photoFile || !musicFile){
-    alert("Pilih foto & lagu dulu 🤍");
+const texts=[
+"first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.",
+"hari ini bukan sekedar hari kasih sayang, tapi hari aku bersyukur karena ketemu kamu.",
+"aku ngerayain kesabaran kamu, cara kamu stay even when things aren't easy.",
+"being with you taught me that love doesn't have to be loud.",
+"so today, i celebrate you. still with you, always 🤍"
+];
+
+let index=0;
+let interval;
+
+function start(){
+  document.getElementById("opening").style.display="none";
+  document.getElementById("main").style.display="flex";
+
+  const music=document.getElementById("music");
+  music.play().catch(()=>{});
+
+  showSlide();
+  interval=setInterval(showSlide,6000);
+}
+
+function showSlide(){
+  if(index>=photos.length){
+    clearInterval(interval);
     return;
   }
 
-  const photoURL = URL.createObjectURL(photoFile);
-  const musicURL = URL.createObjectURL(musicFile);
-
-  document.getElementById("photo").src = photoURL;
-  document.getElementById("music").src = musicURL;
-
-  document.getElementById("setup").style.display="none";
-  document.getElementById("main").style.display="flex";
-
-  document.getElementById("music").play();
+  document.getElementById("photo").src=photos[index];
+  document.getElementById("text").textContent=texts[index];
+  index++;
 }
 </script>
 
