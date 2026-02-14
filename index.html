@@ -2,34 +2,28 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 <title>Valentine</title>
 
 <style>
 html,body{
   margin:0;
-  padding:0;
   height:100%;
   background:#111;
   font-family:system-ui;
   overflow:hidden;
 }
 
-/* FULLSCREEN MOBILE */
 .app{
   position:relative;
   width:100vw;
   height:100vh;
-  overflow:hidden;
 }
 
-/* CANVAS RESPONSIVE */
 canvas{
   position:absolute;
   inset:0;
-  width:100%;
-  height:100%;
 }
 
 .layer{
@@ -74,89 +68,82 @@ canvas{
   background:linear-gradient(transparent, rgba(0,0,0,.65));
 }
 
-.text{
-  font-size:15px;
-  line-height:1.5;
-}
-
-/* FIX BUNGA */
+/* 🌸 BUNGA BARU (rapi & center) */
 .flower{
   position:relative;
-  width:200px;
-  height:200px;
+  width:220px;
+  height:220px;
 }
 
 .petal{
   position:absolute;
-  width:60px;
-  height:24px;
+  top:50%;
+  left:50%;
+  width:70px;
+  height:26px;
   border-radius:50%;
   background:linear-gradient(135deg,#ff9fc4,#ffd7ea);
-  transform-origin:left center;
-  transition:transform .5s ease;
-  will-change:transform;
+  transform-origin:0 50%;
+  opacity:0;
+  transition:.5s ease;
 }
 
 .center{
   position:absolute;
-  top:50%;left:50%;
-  width:36px;height:36px;
-  border-radius:50%;
+  top:50%;
+  left:50%;
+  width:40px;
+  height:40px;
   background:#ffe3a3;
+  border-radius:50%;
   transform:translate(-50%,-50%);
 }
 </style>
 </head>
 
 <body>
-
 <div class="app">
+
 <div class="bg"></div>
 <canvas id="fx"></canvas>
 
-<!-- OPENING -->
 <div class="layer" id="opening">
   <h2>From me → For you 🤍</h2>
   <small>Tap layar untuk mulai</small>
 </div>
 
-<!-- SLIDE -->
 <div class="layer" id="slide" style="display:none">
   <div class="circle">
     <img id="photo" src="foto1.jpg">
   </div>
-
   <div class="panel">
-    <div id="typed" class="text"></div>
+    <div id="typed"></div>
   </div>
 </div>
 
-<!-- CLOSING -->
 <div class="layer" id="closing" style="display:none">
   <div id="flower" class="flower"></div>
   <h3>Still with you, always 🤍</h3>
 </div>
 
-<!-- ⭐ AUDIO KHUSUS CHROME -->
 <audio id="music" src="lagu.mp3" loop playsinline muted></audio>
 
 </div>
 
 <script>
-/* =========================
-   CANVAS RESPONSIVE
-========================= */
+/* =================
+   CANVAS HEART
+================= */
 const canvas=document.getElementById('fx');
 const ctx=canvas.getContext('2d');
 
 function resize(){
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
+  canvas.width=innerWidth;
+  canvas.height=innerHeight;
 }
 resize();
-window.addEventListener('resize',resize);
+addEventListener('resize',resize);
 
-/* HEART EFFECT */
 const hearts=Array.from({length:25},()=>({
   x:Math.random()*canvas.width,
   y:Math.random()*canvas.height,
@@ -177,9 +164,10 @@ function draw(){
 }
 draw();
 
-/* =========================
-   SLIDESHOW
-========================= */
+/* =================
+   TIMING 1:23 MENIT
+================= */
+const TOTAL_TIME = 83000; // 83 detik
 const photos=["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg","foto5.jpg"];
 const texts=[
 "Terima kasih sudah selalu ada.",
@@ -188,6 +176,8 @@ const texts=[
 "Love doesn't have to be loud.",
 "Still with you, always."
 ];
+
+const DURATION = TOTAL_TIME / photos.length;
 
 const opening=document.getElementById('opening');
 const slide=document.getElementById('slide');
@@ -204,7 +194,7 @@ function typeText(t){
  const iv=setInterval(()=>{
    typed.textContent+=t[k++]||"";
    if(k>=t.length)clearInterval(iv);
- },20);
+ },18);
 }
 
 function next(){
@@ -218,24 +208,25 @@ function next(){
  photo.src=photos[i];
  typeText(texts[i]);
  i++;
- setTimeout(next,4000);
+ setTimeout(next,DURATION);
 }
 
-/* =========================
-   BUNGA
-========================= */
+/* =================
+   FLOWER RAPI
+================= */
 function buildFlower(){
  const f=document.getElementById('flower');
 
- for(let j=0;j<8;j++){
+ for(let j=0;j<10;j++){
    const p=document.createElement('div');
    p.className="petal";
-   const a=(360/8)*j;
-   p.style.transform=`rotate(${a}deg) translateX(70px) scale(0)`;
    f.appendChild(p);
 
+   const angle=(360/10)*j;
+
    setTimeout(()=>{
-     p.style.transform=`rotate(${a}deg) translateX(70px) scale(1)`
+     p.style.opacity=1;
+     p.style.transform=`rotate(${angle}deg) translateX(80px)`;
    },j*120);
  }
 
@@ -244,10 +235,10 @@ function buildFlower(){
  f.appendChild(c);
 }
 
-/* =========================
-   START (Chrome SAFE AUDIO)
-========================= */
-window.addEventListener('click',()=>{
+/* =================
+   START
+================= */
+addEventListener('click',()=>{
   music.muted=false;
   music.play().catch(()=>{});
   opening.style.display="none";
@@ -258,4 +249,3 @@ window.addEventListener('click',()=>{
 
 </body>
 </html>
-
