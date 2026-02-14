@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Valentine</title>
 
 <style>
@@ -21,7 +21,7 @@ html,body{
   overflow:hidden;
 }
 
-/* BACKGROUND */
+/* BG */
 .bg{
   position:absolute;
   inset:0;
@@ -33,14 +33,14 @@ html,body{
   to{filter:brightness(1.15)}
 }
 
-/* CANVAS */
+/* canvas */
 canvas{
   position:absolute;
   inset:0;
-  pointer-events:none; /* supaya tidak blok klik */
+  pointer-events:none; /* biar bisa di klik HP */
 }
 
-/* LAYER */
+/* layer */
 .layer{
   position:absolute;
   inset:0;
@@ -53,7 +53,7 @@ canvas{
   padding:20px;
 }
 
-/* FOTO */
+/* foto */
 .circle{
   width:min(75vw,320px);
   height:min(75vw,320px);
@@ -61,6 +61,7 @@ canvas{
   overflow:hidden;
   border:5px solid rgba(255,255,255,.8);
   box-shadow:0 0 40px rgba(255,150,200,.7);
+  transition:opacity 1s;
 }
 
 .circle img{
@@ -69,7 +70,7 @@ canvas{
   object-fit:cover;
 }
 
-/* PANEL */
+/* text panel */
 .panel{
   position:absolute;
   bottom:0;
@@ -105,21 +106,19 @@ canvas{
   <div class="circle">
     <img id="photo" src="foto1.jpg">
   </div>
+
   <div class="panel">
     <div id="typed" class="text"></div>
   </div>
 </div>
 
-<!-- 🔥 AUDIO FIX (PRELOAD + SOURCE) -->
-<audio id="music" preload="auto" loop>
-  <source src="lagu.mp3" type="audio/mpeg">
-</audio>
-
+<audio id="music" src="lagu.mp3" loop playsinline preload="auto"></audio>
 </div>
+
 
 <script>
 /* ======================
-   CANVAS EFFECT
+   CANVAS HEART
 ====================== */
 const canvas = document.getElementById("fx");
 const ctx = canvas.getContext("2d");
@@ -129,74 +128,109 @@ function resize(){
   canvas.height = innerHeight;
 }
 resize();
-addEventListener("resize", resize);
+addEventListener("resize",resize);
 
 const hearts = Array.from({length:40},()=>({
- x:Math.random()*canvas.width,
- y:Math.random()*canvas.height,
- s:Math.random()*1+0.4
+  x:Math.random()*canvas.width,
+  y:Math.random()*canvas.height,
+  s:Math.random()*1+0.5
 }));
 
 function draw(){
- ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
- hearts.forEach(h=>{
-  h.y-=h.s;
-  if(h.y<0) h.y=canvas.height;
-  ctx.fillStyle="#ffb6d5";
-  ctx.fillRect(h.x,h.y,3,3);
- });
+  hearts.forEach(h=>{
+    h.y-=h.s;
+    if(h.y<0) h.y=canvas.height;
 
- requestAnimationFrame(draw);
+    ctx.fillStyle="#ffb6d5";
+    ctx.fillRect(h.x,h.y,3,3);
+  });
+
+  requestAnimationFrame(draw);
 }
 draw();
 
 
 /* ======================
-   TEXT + MUSIC FIX HP
+   FOTO + TEXT + MUSIC
 ====================== */
-const opening = document.getElementById("opening");
-const slide   = document.getElementById("slide");
-const typed   = document.getElementById("typed");
-const music   = document.getElementById("music");
+const photos=[
+  "foto1.jpg",
+  "foto2.jpg",
+  "foto3.jpg",
+  "foto4.jpg",
+  "foto5.jpg"
+];
 
-const text = `first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
+const text=`first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
 lewat hal-hal kecil yang bahkan aku sendiri ga sadar, contohnya kaya ada kamu didalamnya.
 
+mungkin keliatan ga bermakna ya? tapi serius, hari ini bukan sekedar hari kasih sayang.
+tapi juga salah satu hari dimana aku udah ga sabar mau rayain hari ini, dimana aku ngerayain rasa syukur karena semesta pernah baik banget, ngenalin aku ke kamu.
+
+aku ngerayain kesabaran kamu, cara kamu stay even when things aren't easy, dan cara kamu hadir tanpa banyak janji tapi selalu nyata.
+
 being with you taught me that love doesn't have to be loud.
-sometimes it's quiet, warm, and steady.
+sometimes it's quiet, warm, and steady like you holding my hand without saying anything, but somehow everything feels okay.
+
+so today, i celebrate you. us.
+not just on valentine, but on every ordinary day that turns special just because you're there.
+
+thank you for choosing me, for staying, and for being the love i never knew i needed this much.
 
 still with you, always 🤍`;
 
+const opening = document.getElementById("opening");
+const slide   = document.getElementById("slide");
+const photo   = document.getElementById("photo");
+const typed   = document.getElementById("typed");
+const music   = document.getElementById("music");
 
-/* 🔥 START FUNCTION (FIX MOBILE AUDIO) */
-function start(e){
+let p=0;
 
-  e.preventDefault();
 
-  opening.style.display="none";
-  slide.style.display="flex";
+/* slideshow foto */
+function nextPhoto(){
+  photo.style.opacity=0;
 
-  /* paksa play biar HP bunyi */
-  music.currentTime = 0;
-  music.muted = false;
+  setTimeout(()=>{
+    photo.src = photos[p%photos.length];
+    photo.style.opacity=1;
+    p++;
+  },400);
+}
+setInterval(nextPhoto,5000);
 
-  const p = music.play();
-  if(p !== undefined){
-    p.catch(()=>{});
-  }
 
-  /* efek ketik */
+/* type text */
+function typeText(){
   let i=0;
   const iv=setInterval(()=>{
     typed.textContent+=text[i++]||"";
+    typed.scrollTop=typed.scrollHeight;
     if(i>=text.length) clearInterval(iv);
   },18);
 }
 
-/* penting: touchstart untuk HP */
-opening.addEventListener("touchstart", start, {once:true});
-opening.addEventListener("click", start, {once:true});
+
+/* start aman HP */
+opening.addEventListener("click",start);
+opening.addEventListener("touchstart",start);
+
+async function start(){
+  opening.style.display="none";
+  slide.style.display="flex";
+
+  try{
+    await music.play();
+  }catch{
+    music.load();
+    music.play();
+  }
+
+  typeText();
+}
 </script>
 
 </body>
