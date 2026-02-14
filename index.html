@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Valentine</title>
+<title>For You 🤍</title>
 
 <style>
 html,body{
@@ -21,7 +21,7 @@ html,body{
   overflow:hidden;
 }
 
-/* BG */
+/* Background */
 .bg{
   position:absolute;
   inset:0;
@@ -33,14 +33,14 @@ html,body{
   to{filter:brightness(1.15)}
 }
 
-/* canvas */
+/* Canvas */
 canvas{
   position:absolute;
   inset:0;
-  pointer-events:none; /* biar bisa di klik HP */
+  pointer-events:none;
 }
 
-/* layer */
+/* Layer */
 .layer{
   position:absolute;
   inset:0;
@@ -53,7 +53,7 @@ canvas{
   padding:20px;
 }
 
-/* foto */
+/* Foto bulat */
 .circle{
   width:min(75vw,320px);
   height:min(75vw,320px);
@@ -61,7 +61,7 @@ canvas{
   overflow:hidden;
   border:5px solid rgba(255,255,255,.8);
   box-shadow:0 0 40px rgba(255,150,200,.7);
-  transition:opacity 1s;
+  transition:opacity 1s ease;
 }
 
 .circle img{
@@ -70,7 +70,7 @@ canvas{
   object-fit:cover;
 }
 
-/* text panel */
+/* Panel text */
 .panel{
   position:absolute;
   bottom:0;
@@ -115,11 +115,8 @@ canvas{
 <audio id="music" src="lagu.mp3" loop playsinline preload="auto"></audio>
 </div>
 
-
 <script>
-/* ======================
-   CANVAS HEART
-====================== */
+/* ===== CANVAS HEART FLOATING ===== */
 const canvas = document.getElementById("fx");
 const ctx = canvas.getContext("2d");
 
@@ -130,32 +127,49 @@ function resize(){
 resize();
 addEventListener("resize",resize);
 
-const hearts = Array.from({length:40},()=>({
+const hearts = Array.from({length:50},()=>({
   x:Math.random()*canvas.width,
   y:Math.random()*canvas.height,
-  s:Math.random()*1+0.5
+  size:Math.random()*12+8,
+  speed:Math.random()*1+0.5,
+  alpha:Math.random()*0.5+0.5
 }));
 
-function draw(){
+function drawHeart(x,y,size,alpha){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(size/20,size/20);
+  ctx.globalAlpha = alpha;
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.bezierCurveTo(0,-10,-20,-10,-20,5);
+  ctx.bezierCurveTo(-20,20,0,30,0,40);
+  ctx.bezierCurveTo(0,30,20,20,20,5);
+  ctx.bezierCurveTo(20,-10,0,-10,0,0);
+  ctx.fillStyle="#ff9ecf";
+  ctx.fill();
+  ctx.restore();
+}
+
+function animate(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   hearts.forEach(h=>{
-    h.y-=h.s;
-    if(h.y<0) h.y=canvas.height;
-
-    ctx.fillStyle="#ffb6d5";
-    ctx.fillRect(h.x,h.y,3,3);
+    h.y -= h.speed;
+    if(h.y < -40){
+      h.y = canvas.height + 40;
+      h.x = Math.random()*canvas.width;
+    }
+    drawHeart(h.x,h.y,h.size,h.alpha);
   });
 
-  requestAnimationFrame(draw);
+  requestAnimationFrame(animate);
 }
-draw();
+animate();
 
+/* ===== FOTO + TEXT + MUSIC ===== */
 
-/* ======================
-   FOTO + TEXT + MUSIC
-====================== */
-const photos=[
+const photos = [
   "foto1.jpg",
   "foto2.jpg",
   "foto3.jpg",
@@ -163,7 +177,7 @@ const photos=[
   "foto5.jpg"
 ];
 
-const text=`first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
+const text = `first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
 lewat hal-hal kecil yang bahkan aku sendiri ga sadar, contohnya kaya ada kamu didalamnya.
 
 mungkin keliatan ga bermakna ya? tapi serius, hari ini bukan sekedar hari kasih sayang.
@@ -189,32 +203,28 @@ const music   = document.getElementById("music");
 
 let p=0;
 
-
-/* slideshow foto */
+/* slideshow */
 function nextPhoto(){
   photo.style.opacity=0;
-
   setTimeout(()=>{
     photo.src = photos[p%photos.length];
     photo.style.opacity=1;
     p++;
-  },400);
+  },500);
 }
 setInterval(nextPhoto,5000);
 
-
-/* type text */
+/* typing */
 function typeText(){
   let i=0;
   const iv=setInterval(()=>{
     typed.textContent+=text[i++]||"";
     typed.scrollTop=typed.scrollHeight;
     if(i>=text.length) clearInterval(iv);
-  },18);
+  },20);
 }
 
-
-/* start aman HP */
+/* start (aman untuk HP) */
 opening.addEventListener("click",start);
 opening.addEventListener("touchstart",start);
 
