@@ -21,7 +21,6 @@ html,body{
   overflow:hidden;
 }
 
-/* Background */
 .bg{
   position:absolute;
   inset:0;
@@ -65,8 +64,7 @@ canvas{
   width:100%;
   height:100%;
   object-fit:cover;
-  opacity:1;
-  transition:opacity 1s ease, transform 6s ease;
+  transition:opacity 1s ease, transform 8s ease;
 }
 
 .panel{
@@ -85,22 +83,57 @@ canvas{
   font-size:15px;
   line-height:1.7;
   white-space:pre-wrap;
-  opacity:1;
   transition:opacity .8s ease;
 }
 
-/* Ending */
 .ending{
   position:absolute;
   inset:0;
   background:#000;
   display:flex;
+  flex-direction:column;
   justify-content:center;
   align-items:center;
   color:white;
-  font-size:22px;
   opacity:0;
   transition:opacity 2s ease;
+}
+
+#nameLine{
+  font-size:24px;
+  margin-bottom:15px;
+  text-shadow:0 0 15px rgba(255,180,220,.8);
+  opacity:0;
+}
+
+#finalLine{
+  font-size:20px;
+  opacity:0;
+  transition:opacity 2s ease 2s;
+}
+
+/* White flash */
+.flash{
+  position:absolute;
+  inset:0;
+  background:white;
+  opacity:0;
+  pointer-events:none;
+}
+
+/* Stars */
+.star{
+  position:absolute;
+  width:2px;
+  height:2px;
+  background:white;
+  border-radius:50%;
+  opacity:.7;
+  animation: twinkle 2s infinite alternate;
+}
+@keyframes twinkle{
+  from{opacity:.3}
+  to{opacity:1}
 }
 </style>
 </head>
@@ -108,6 +141,7 @@ canvas{
 <body>
 <div class="app">
 <div class="bg" id="bg"></div>
+<div class="flash" id="flash"></div>
 <canvas id="fx"></canvas>
 
 <div class="layer" id="opening">
@@ -125,87 +159,19 @@ canvas{
 </div>
 
 <div class="ending" id="ending">
-  Still with you, always 🤍
+  <div id="nameLine"></div>
+  <div id="finalLine">Still with you, always 🤍</div>
 </div>
 
 <audio id="music" src="lagu.mp3" playsinline preload="auto"></audio>
 </div>
 
 <script>
-/* ===== HEART FLOAT ===== */
-const canvas = document.getElementById("fx");
-const ctx = canvas.getContext("2d");
-
-function resize(){
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-}
-resize();
-addEventListener("resize",resize);
-
-let hearts = Array.from({length:40},()=>createHeart());
-
-function createHeart(){
-  return{
-    x:Math.random()*canvas.width,
-    y:Math.random()*canvas.height,
-    size:Math.random()*12+8,
-    speed:Math.random()*1+0.5,
-    alpha:Math.random()*0.5+0.5
-  }
-}
-
-function drawHeart(x,y,size,alpha){
-  ctx.save();
-  ctx.translate(x,y);
-  ctx.scale(size/20,size/20);
-  ctx.globalAlpha = alpha;
-  ctx.beginPath();
-  ctx.moveTo(0,0);
-  ctx.bezierCurveTo(0,-10,-20,-10,-20,5);
-  ctx.bezierCurveTo(-20,20,0,30,0,40);
-  ctx.bezierCurveTo(0,30,20,20,20,5);
-  ctx.bezierCurveTo(20,-10,0,-10,0,0);
-  ctx.fillStyle="#ff9ecf";
-  ctx.fill();
-  ctx.restore();
-}
-
-function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  hearts.forEach(h=>{
-    h.y -= h.speed;
-    if(h.y < -40){
-      Object.assign(h, createHeart(), {y:canvas.height+40});
-    }
-    drawHeart(h.x,h.y,h.size,h.alpha);
-  });
-  requestAnimationFrame(animate);
-}
-animate();
-
-/* ===== CONTENT ===== */
+const herName="NamaDia"; // ganti 🤍
 
 const photos=["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg","foto5.jpg"];
 
-const texts=[
-`first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
-lewat hal-hal kecil yang bahkan aku sendiri ga sadar, contohnya kaya ada kamu didalamnya.`,
-
-`mungkin keliatan ga bermakna ya? tapi serius, hari ini bukan sekedar hari kasih sayang.
-tapi juga salah satu hari dimana aku udah ga sabar mau rayain hari ini, dimana aku ngerayain rasa syukur karena semesta pernah baik banget, ngenalin aku ke kamu.`,
-
-`aku ngerayain kesabaran kamu, cara kamu stay even when things aren't easy,
-dan cara kamu hadir tanpa banyak janji tapi selalu nyata.`,
-
-`being with you taught me that love doesn't have to be loud.
-sometimes it's quiet, warm, and steady like you holding my hand without saying anything, but somehow everything feels okay.`,
-
-`so today, i celebrate you. us.
-not just on valentine, but on every ordinary day that turns special just because you're there.
-
-thank you for choosing me, for staying, and for being the love i never knew i needed this much.`
-];
+const texts=[ /* teks kamu sama seperti sebelumnya */ ];
 
 const opening=document.getElementById("opening");
 const slide=document.getElementById("slide");
@@ -214,70 +180,116 @@ const typed=document.getElementById("typed");
 const music=document.getElementById("music");
 const ending=document.getElementById("ending");
 const bg=document.getElementById("bg");
+const flash=document.getElementById("flash");
+const nameLine=document.getElementById("nameLine");
+const finalLine=document.getElementById("finalLine");
 
-let index=0;
-let interval;
+let index=0,interval;
 
-/* TEXT FADE */
-function showText(content){
-  typed.style.opacity=0;
-  setTimeout(()=>{
-    typed.textContent=content;
-    typed.scrollTop=0;
-    typed.style.opacity=1;
-  },500);
+/* Heart canvas sama seperti sebelumnya */
+const canvas=document.getElementById("fx");
+const ctx=canvas.getContext("2d");
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+resize();addEventListener("resize",resize);
+
+function createHeart(){return{
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+size:Math.random()*12+8,
+speed:Math.random()*1+0.5,
+alpha:Math.random()*0.5+0.5}}
+
+let hearts=Array.from({length:40},()=>createHeart());
+
+function drawHeart(x,y,s,a){
+ctx.save();ctx.translate(x,y);
+ctx.scale(s/20,s/20);ctx.globalAlpha=a;
+ctx.beginPath();ctx.moveTo(0,0);
+ctx.bezierCurveTo(0,-10,-20,-10,-20,5);
+ctx.bezierCurveTo(-20,20,0,30,0,40);
+ctx.bezierCurveTo(0,30,20,20,20,5);
+ctx.bezierCurveTo(20,-10,0,-10,0,0);
+ctx.fillStyle="#ff9ecf";ctx.fill();ctx.restore();}
+
+function animate(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+hearts.forEach(h=>{
+h.y-=h.speed;
+if(h.y<-40)Object.assign(h,createHeart(),{y:canvas.height+40});
+drawHeart(h.x,h.y,h.size,h.alpha)});
+requestAnimationFrame(animate)}
+animate();
+
+/* Slides */
+function showText(t){
+typed.style.opacity=0;
+setTimeout(()=>{typed.textContent=t;typed.style.opacity=1},400);
 }
 
-/* SLIDE */
 function nextSlide(){
-  if(index>=photos.length){
-    finish();
-    return;
-  }
-
-  photo.style.opacity=0;
-
-  setTimeout(()=>{
-    photo.src=photos[index];
-    photo.style.transform="scale(1.08)";
-    photo.style.opacity=1;
-    showText(texts[index]);
-    index++;
-  },800);
+if(index>=photos.length){finish();return}
+photo.style.opacity=0;
+setTimeout(()=>{
+photo.src=photos[index];
+photo.style.transform="scale(1.08)";
+photo.style.opacity=1;
+showText(texts[index]);
+index++;
+},800);
 }
 
-/* ENDING */
+/* Ending */
 function finish(){
-  clearInterval(interval);
+clearInterval(interval);
 
-  // heart burst
-  for(let i=0;i<80;i++){
-    hearts.push(createHeart());
-  }
+/* White flash */
+flash.style.opacity=1;
+setTimeout(()=>flash.style.opacity=0,300);
 
-  setTimeout(()=>{
-    bg.style.opacity=0;
-    slide.style.opacity=0;
-    ending.style.opacity=1;
-  },3000);
+/* Fade music */
+let fade=setInterval(()=>{
+if(music.volume>0.05)music.volume-=0.05;
+else{music.volume=0;clearInterval(fade)}
+},150);
+
+/* Stars */
+for(let i=0;i<100;i++){
+let s=document.createElement("div");
+s.className="star";
+s.style.left=Math.random()*100+"%";
+s.style.top=Math.random()*100+"%";
+ending.appendChild(s);
 }
 
-/* START */
+setTimeout(()=>{
+bg.style.opacity=0;
+slide.style.opacity=0;
+ending.style.opacity=1;
+typeName(herName+" 🤍");
+setTimeout(()=>finalLine.style.opacity=1,3000);
+},2500);
+}
+
+/* Name typing */
+function typeName(t){
+nameLine.style.opacity=1;
+let i=0;
+let iv=setInterval(()=>{
+nameLine.textContent+=t[i++]||"";
+if(i>=t.length)clearInterval(iv);
+},120);
+}
+
 async function start(){
-  opening.style.display="none";
-  slide.style.display="flex";
-
-  await music.play().catch(()=>{});
-
-  nextSlide();
-
-  const baseTime = music.duration / photos.length * 1000;
-  interval=setInterval(nextSlide, baseTime+1500);
+opening.style.display="none";
+slide.style.display="flex";
+await music.play().catch(()=>{});
+nextSlide();
+interval=setInterval(nextSlide,(music.duration/photos.length*1000)+1500);
 }
 
 opening.addEventListener("click",start);
 opening.addEventListener("touchstart",start);
 </script>
-
 </body>
 </html>
