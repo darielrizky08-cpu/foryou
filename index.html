@@ -4,6 +4,63 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
 <title>Valentine</title>
+<script>
+/* =========================
+   PATCH FIX (TIDAK UBAH KODE ASLI)
+========================= */
+
+/* 1. biar canvas tidak blok klik */
+document.querySelector("canvas").style.pointerEvents="none";
+
+/* 2. ambil element dengan aman */
+const openingEl = document.getElementById("opening");
+const slideEl   = document.getElementById("slide");
+const closingEl = document.getElementById("closing");
+const photoEl   = document.getElementById("photo");
+const typedEl   = document.getElementById("typed");
+const musicEl   = document.getElementById("music");
+const flowerEl  = document.getElementById("flower");
+
+
+/* 3. paksa klik + sentuh mobile */
+function startFix(){
+
+  if(musicEl){
+    musicEl.muted=false;
+    musicEl.play().catch(()=>{});
+  }
+
+  if(openingEl) openingEl.style.display="none";
+  if(slideEl)   slideEl.style.display="flex";
+
+  /* ketik ulang text biar muncul di HP */
+  if(typedEl){
+    const text = typedEl.textContent || typedEl.innerText;
+    typedEl.textContent="";
+    let i=0;
+    const iv=setInterval(()=>{
+      typedEl.textContent+=text[i++]||"";
+      if(i>=text.length) clearInterval(iv);
+    },18);
+  }
+}
+
+openingEl?.addEventListener("click",startFix);
+openingEl?.addEventListener("touchstart",startFix);
+
+
+/* 4. jaga canvas ukuran HP */
+const canvas=document.getElementById("fx");
+if(canvas){
+  const ctx=canvas.getContext("2d");
+  function resize(){
+    canvas.width=innerWidth;
+    canvas.height=innerHeight;
+  }
+  resize();
+  addEventListener("resize",resize);
+}
+</script>
 
 <style>
 html,body{
@@ -302,3 +359,4 @@ opening.onclick=()=>{
 
 </body>
 </html>
+
