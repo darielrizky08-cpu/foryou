@@ -21,9 +21,7 @@ html,body{
   overflow:hidden;
 }
 
-/* ======================
-   BACKGROUND GLOW
-====================== */
+/* BG */
 .bg{
   position:absolute;
   inset:0;
@@ -38,6 +36,7 @@ html,body{
 canvas{
   position:absolute;
   inset:0;
+  pointer-events:none;
 }
 
 .layer{
@@ -59,7 +58,6 @@ canvas{
   overflow:hidden;
   border:5px solid rgba(255,255,255,.8);
   box-shadow:0 0 40px rgba(255,150,200,.7);
-  transition:opacity 1s;
 }
 
 .circle img{
@@ -91,7 +89,6 @@ canvas{
   width:200px;
   height:200px;
 }
-
 .petal{
   position:absolute;
   width:60px;
@@ -99,9 +96,7 @@ canvas{
   border-radius:50%;
   background:linear-gradient(135deg,#ff9fc4,#ffd7ea);
   transform-origin:center;
-  transition:transform .6s ease;
 }
-
 .center{
   position:absolute;
   top:50%;left:50%;
@@ -114,8 +109,8 @@ canvas{
 </head>
 
 <body>
-
 <div class="app">
+
 <div class="bg"></div>
 <canvas id="fx"></canvas>
 
@@ -128,6 +123,7 @@ canvas{
   <div class="circle">
     <img id="photo" src="foto1.jpg">
   </div>
+
   <div class="panel">
     <div id="typed" class="text"></div>
   </div>
@@ -139,81 +135,79 @@ canvas{
 </div>
 
 <audio id="music" src="lagu.mp3" loop playsinline></audio>
+
 </div>
 
 
-<!-- ======================
-     SCRIPT ASLI KAMU
-====================== -->
 <script>
-const canvas=fx;
-const ctx=canvas.getContext("2d");
+/* ======================
+   AMBIL ELEMENT (FIX)
+====================== */
+const canvas = document.getElementById("fx");
+const opening = document.getElementById("opening");
+const slide = document.getElementById("slide");
+const typed = document.getElementById("typed");
+const music = document.getElementById("music");
 
+const ctx = canvas.getContext("2d");
+
+
+/* ======================
+   CANVAS HEART EFFECT
+====================== */
 function resize(){
-  canvas.width=innerWidth;
-  canvas.height=innerHeight;
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
 }
 resize();
-addEventListener("resize",resize);
+addEventListener("resize", resize);
 
-const hearts=Array.from({length:40},()=>({
- x:Math.random()*canvas.width,
- y:Math.random()*canvas.height,
- s:Math.random()*1+0.4
+const hearts = Array.from({length:40},()=>({
+  x:Math.random()*canvas.width,
+  y:Math.random()*canvas.height,
+  s:Math.random()*1+0.4
 }));
 
 function draw(){
- ctx.clearRect(0,0,canvas.width,canvas.height);
- hearts.forEach(h=>{
-  h.y-=h.s;
-  if(h.y<0) h.y=canvas.height;
-  ctx.fillStyle="#ffb6d5";
-  ctx.fillRect(h.x,h.y,3,3);
- });
- requestAnimationFrame(draw);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  hearts.forEach(h=>{
+    h.y-=h.s;
+    if(h.y<0) h.y=canvas.height;
+    ctx.fillStyle="#ffb6d5";
+    ctx.fillRect(h.x,h.y,3,3);
+  });
+  requestAnimationFrame(draw);
 }
 draw();
 
+
+/* ======================
+   TYPING TEXT
+====================== */
 const text=`first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
 still with you, always 🤍`;
 
-opening.onclick=()=>{
- opening.style.display="none";
- slide.style.display="flex";
 
- music.play();
+/* ======================
+   START (HP + DESKTOP)
+====================== */
+function start(){
 
- let i=0;
- const iv=setInterval(()=>{
-  typed.textContent+=text[i++]||"";
-  if(i>=text.length) clearInterval(iv);
- },18);
-};
-</script>
+  opening.style.display="none";
+  slide.style.display="flex";
 
+  music.muted=false;
+  music.play().catch(()=>{});
 
-<!-- ======================
-     PATCH TAMBAHAN (FIX HP)
-     <<< INI YANG BARU >>>
-====================== -->
-<script>
-window.addEventListener("load",()=>{
+  let i=0;
+  const iv=setInterval(()=>{
+    typed.textContent+=text[i++]||"";
+    if(i>=text.length) clearInterval(iv);
+  },18);
+}
 
-  const canvas=document.getElementById("fx");
-  const opening=document.getElementById("opening");
-  const music=document.getElementById("music");
-
-  if(canvas) canvas.style.pointerEvents="none";
-
-  function forceStart(){
-    music.muted=false;
-    music.play().catch(()=>{});
-  }
-
-  opening?.addEventListener("touchstart",forceStart);
-  opening?.addEventListener("click",forceStart);
-
-});
+opening.addEventListener("click",start);
+opening.addEventListener("touchstart",start);
 </script>
 
 </body>
