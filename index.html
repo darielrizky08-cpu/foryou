@@ -21,9 +21,7 @@ html,body{
   overflow:hidden;
 }
 
-/* ======================
-   BACKGROUND GLOW
-====================== */
+/* ================= BACKGROUND ================= */
 .bg{
   position:absolute;
   inset:0;
@@ -35,16 +33,20 @@ html,body{
   to{filter:brightness(1.15)}
 }
 
-/* CANVAS */
+/* ================= CANVAS FIX ================= */
 canvas{
   position:absolute;
   inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none; /* ⭐ supaya bisa klik layer */
 }
 
-/* LAYER */
+/* ================= LAYER ================= */
 .layer{
   position:absolute;
   inset:0;
+  z-index:2;
   display:flex;
   flex-direction:column;
   justify-content:center;
@@ -54,7 +56,7 @@ canvas{
   padding:20px;
 }
 
-/* FOTO */
+/* ================= FOTO ================= */
 .circle{
   width:min(75vw,320px);
   height:min(75vw,320px);
@@ -71,14 +73,14 @@ canvas{
   object-fit:cover;
 }
 
-/* PANEL */
+/* ================= PANEL ================= */
 .panel{
   position:absolute;
   bottom:0;
   left:0;
   right:0;
   padding:20px;
-  background:rgba(0,0,0,.5);
+  background:rgba(0,0,0,.55);
   backdrop-filter:blur(8px);
   max-height:45vh;
   overflow-y:auto;
@@ -90,11 +92,11 @@ canvas{
   white-space:pre-wrap;
 }
 
-/* FLOWER */
+/* ================= FLOWER FIX ================= */
 .flower{
   position:relative;
-  width:200px;
-  height:200px;
+  width:220px;
+  height:220px;
 }
 
 .petal{
@@ -103,6 +105,8 @@ canvas{
   height:24px;
   border-radius:50%;
   background:linear-gradient(135deg,#ff9fc4,#ffd7ea);
+  left:50%;
+  top:50%;
   transform-origin:center;
   transition:transform .6s ease;
 }
@@ -110,7 +114,7 @@ canvas{
 .center{
   position:absolute;
   top:50%;left:50%;
-  width:36px;height:36px;
+  width:40px;height:40px;
   border-radius:50%;
   background:#ffe3a3;
   transform:translate(-50%,-50%);
@@ -147,10 +151,8 @@ canvas{
 </div>
 
 <script>
-/* ======================
-   CANVAS HEART + STARS
-====================== */
-const canvas=fx;
+/* ================= CANVAS EFFECT ================= */
+const canvas=document.getElementById("fx");
 const ctx=canvas.getContext("2d");
 
 function resize(){
@@ -160,109 +162,76 @@ function resize(){
 resize();
 addEventListener("resize",resize);
 
-const hearts=Array.from({length:40},()=>({
+const hearts=Array.from({length:35},()=>({
  x:Math.random()*canvas.width,
  y:Math.random()*canvas.height,
- s:Math.random()*1+0.4
+ s:Math.random()*1+.4
 }));
-
-const stars=Array.from({length:40},()=>({
- x:Math.random()*canvas.width,
- y:Math.random()*canvas.height,
- a:Math.random()
-}));
-
-function heart(x,y,size){
- ctx.beginPath();
- ctx.moveTo(x,y);
- ctx.bezierCurveTo(x,y-3*size,x-5*size,y-3*size,x-5*size,y);
- ctx.bezierCurveTo(x-5*size,y+3*size,x,y+4*size,x,y+6*size);
- ctx.bezierCurveTo(x,y+4*size,x+5*size,y+3*size,x+5*size,y);
- ctx.bezierCurveTo(x+5*size,y-3*size,x,y-3*size,x,y);
- ctx.fill();
-}
 
 function draw(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
 
- stars.forEach(s=>{
-  s.a+=0.02;
-  ctx.globalAlpha=(Math.sin(s.a)+1)/2;
-  ctx.fillStyle="white";
-  ctx.fillRect(s.x,s.y,2,2);
- });
-
  hearts.forEach(h=>{
   h.y-=h.s;
   if(h.y<0) h.y=canvas.height;
-  ctx.globalAlpha=.9;
-  ctx.fillStyle="#ffb6d5";
-  heart(h.x,h.y,2);
+  ctx.fillStyle="#ffc2da";
+  ctx.beginPath();
+  ctx.arc(h.x,h.y,3,0,Math.PI*2);
+  ctx.fill();
  });
 
- ctx.globalAlpha=1;
  requestAnimationFrame(draw);
 }
 draw();
 
-/* ======================
-   SLIDESHOW + TEXT
-====================== */
+/* ================= SLIDESHOW ================= */
 const photos=["foto1.jpg","foto2.jpg","foto3.jpg","foto4.jpg","foto5.jpg"];
 
-const text=`first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku.
-lewat hal-hal kecil yang bahkan aku sendiri ga sadar, contohnya kaya ada kamu didalamnya.
-
-mungkin keliatan ga bermakna ya? tapi serius, hari ini bukan sekedar hari kasih sayang.
-tapi hari dimana aku ngerayain rasa syukur karena semesta ngenalin aku ke kamu.
-
-being with you taught me that love doesn't have to be loud.
-sometimes it's quiet, warm, and steady.
-
-so today, i celebrate you. us.
+const text=`first, terima kasih ya sayang sudah menemani setiap suka-duka kehidupan aku...
 still with you, always 🤍`;
 
-const photoEl=photo;
-const typed=typed;
-const music=music;
+const photo=document.getElementById("photo");
+const typed=document.getElementById("typed");
+const music=document.getElementById("music");
+const opening=document.getElementById("opening");
+const slide=document.getElementById("slide");
+const closing=document.getElementById("closing");
 
-let p=0;
+let idx=0;
 
-/* FOTO FADE */
+/* FOTO */
 function nextPhoto(){
- photoEl.style.opacity=0;
+ photo.style.opacity=0;
  setTimeout(()=>{
-   photoEl.src=photos[p%photos.length];
-   photoEl.style.opacity=1;
-   p++;
+   photo.src=photos[idx%photos.length];
+   photo.style.opacity=1;
+   idx++;
  },500);
 }
 setInterval(nextPhoto,6000);
 
-/* TYPE */
+/* TEXT */
 function typeText(){
  let i=0;
+ typed.textContent="";
  const iv=setInterval(()=>{
-  typed.textContent+=text[i++]||"";
-  typed.scrollTop=typed.scrollHeight;
-  if(i>=text.length) clearInterval(iv);
+   typed.textContent+=text[i++]||"";
+   typed.scrollTop=typed.scrollHeight;
+   if(i>=text.length) clearInterval(iv);
  },18);
 }
 
-/* FLOWER */
+/* FLOWER RAPI */
 function buildFlower(){
- const f=flower;
- const n=10;
- const r=70;
+ const f=document.getElementById("flower");
+ const n=10, r=75;
 
  for(let i=0;i<n;i++){
   const p=document.createElement("div");
   p.className="petal";
-  const a=(360/n)*i;
-  const x=Math.cos(a*Math.PI/180)*r;
-  const y=Math.sin(a*Math.PI/180)*r;
-  p.style.left="50%";
-  p.style.top="50%";
+  const a=(360/n)*i*Math.PI/180;
+  const x=Math.cos(a)*r;
+  const y=Math.sin(a)*r;
   p.style.transform=`translate(${x}px,${y}px) scale(0)`;
   f.appendChild(p);
 
@@ -274,30 +243,32 @@ function buildFlower(){
  f.appendChild(c);
 }
 
-/* MUSIC FADE IN */
+/* AUDIO */
 function fadeMusic(){
  music.volume=0;
  music.play();
  const iv=setInterval(()=>{
-  music.volume+=0.05;
-  if(music.volume>=1) clearInterval(iv);
+   music.volume+=0.05;
+   if(music.volume>=1) clearInterval(iv);
  },200);
 }
 
-/* START */
-opening.onclick=()=>{
+/* START (HP + Chrome SAFE) */
+function start(){
  opening.style.display="none";
  slide.style.display="flex";
  fadeMusic();
  typeText();
 
- /* total 83 detik */
  setTimeout(()=>{
    slide.style.display="none";
    closing.style.display="flex";
    buildFlower();
- },83000);
-};
+ },83000); /* ⭐ 1 menit 23 detik */
+}
+
+opening.addEventListener("click",start,{once:true});
+opening.addEventListener("touchstart",start,{once:true});
 </script>
 
 </body>
