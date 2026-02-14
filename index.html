@@ -6,15 +6,15 @@
 <title>Still With You 🤍</title>
 
 <style>
-body{
-  margin:0;
-  font-family:sans-serif;
-  background:black;
-  color:white;
-  text-align:center;
-  overflow:hidden;
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background: radial-gradient(circle at 50% 50%, 
+              rgba(255,255,255,0.2), 
+              transparent 60%);
+  pointer-events:none;
 }
-
 /* DREAMY HEART BACKGROUND */
 .hearts{
   position:fixed;
@@ -273,3 +273,4 @@ function secret(){
 
 </body>
 </html>
+
